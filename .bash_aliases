@@ -53,9 +53,13 @@ dl() {
 alias drakelocate="ssh drake locate"
 alias ff=firefox
 alias ffind="find -iname $@"
+alias fg="find|grep -i"
 alias go="xdg-open"
 alias iostat="sudo iostat -xm 5 /dev/sda /dev/sdb /dev/sdc"
-alias kernelchanges="rpm -q --changelog $(rpm -q kernel|tail -n1)|less"
+kernelchanges() {
+rpm -q --changelog $(rpm -q kernel|tail -n1)|less
+}
+alias ls="ls --color=auto"
 alias l="ls -lh"
 alias ll="ls -lh"
 alias maven2eclipsewtp="mvn -DdownloadJavadocs=true -DdownloadSources=true -Dwtpversion=1.5 eclipse:eclipse"
@@ -69,9 +73,7 @@ alias pwdin='cd $(xclip -o)'
 alias pwdout='pwd|xclip'
 # cd to root directory 
 r() {
- curr_dir=`pwd`
- root_dir=${curr_dir%/htrak/*}
- cd $root_dir
+    . cvscd
 }
 alias rsynceasy='rsync --executability --perms --links --update --recursive --verbose --human-readable'
 alias sqlplus="rlwrap sqlplus"
@@ -91,10 +93,14 @@ tc-tail() {
 tc-conf() {
     vi $TOMCAT_HOME/conf/Catalina/localhost/hmshow.xml
 }
+splunk-log() {
+   sudo less /opt/splunkforwarder/var/log/splunk/splunkd.log 
+}
 alias v="vi"
 alias vitd="pushd $HTRAKINFO && cvs -Q up -Pd && popd && vi $TAG_DESCRIPTIONS && pushd $(dirname $TAG_DESCRIPTIONS) && pwd && cvs commit -m "tags" $(basename $TAG_DESCRIPTIONS); popd"
 alias vitd4="pushd $HTRAKINFO && cvs -Q up -Pd && popd && vi $HTRAKINFO/htrakinfo/release-docs/v4-tag-descriptions && pushd $HTRAKINFO && cvs commit; popd"
 alias vimergelog="pushd $HTRAKINFO && cvs -Q up -Pd && popd && vi $HTRAKINFO/htrakinfo/release-docs/v6-merge-log && pushd $HTRAKINFO && cvs commit htrakinfo/release-docs/v6-merge-log; popd"
+alias vireleaselog="pushd $HTRAKINFO && cvs -Q up -Pd && popd && vi $HTRAKINFO/htrakinfo/release-docs/release-log && pushd $HTRAKINFO && cvs commit htrakinfo/release-docs/release-log; popd"
 alias vitl="vi $TOMCAT_LOG"
 alias webshare='python -c "import SimpleHTTPServer;SimpleHTTPServer.test()"'
 alias wgetarchive='wget -E -H -k -K -p'
@@ -137,7 +143,7 @@ function dbg()
 
 function grep-release-notes()
 {
-    pushd $HTRAKINFO/htrakinfo/release-docs/v5_release-notes && cvs -Q up -Pd && ./grep-release-notes.sh "$@" ;popd
+    pushd $HTRAKINFO/htrakinfo/release-docs/ && cvs -Q up -Pd && ./grep-release-notes.sh "$@" ;popd
 }
 
 function updatedblogin()
@@ -224,3 +230,30 @@ function ls_as_urls()
         echo ${fullpath/"/vol/"/$FILE_SERVER_URL}
     done
 )
+# Show me release notes
+
+# Example: rn 6.2.0
+
+function rn() {
+
+  [[ $# != 1 ]] && return
+
+  version=$1
+
+  major_version=${version:0:1}
+
+  xdg-open http://viewvc/viewvc/htrakinfo/htrakinfo/release-docs/v${major_version}_release_notes/${version}/release_notes_internal_${version}.html >/dev/null
+
+}
+
+function vimig() {
+    vim $(find -name '*.sql' -o -name '*.pk?')
+}
+
+#PS1="\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]\n\$"
+PS1="\[\e]0;\w\a\]\n\[\e[33m\]\u@\h \t\n\[\e[1;31m\]\w\n\$ \[\e[0m\]"
+
+function promptcol() {
+    PS1="\[\e]0;\w\a\]\n\[\e[34m\]\u@\h \t\n\[\e[1;34m\]\w\n$ \[\e[0m\]"
+}
+
